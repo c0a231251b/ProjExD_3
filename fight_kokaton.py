@@ -173,6 +173,7 @@ def main():
     bomb = Bomb((255, 0, 0), 10) #Bombインスタンスを生成
     score=Score() #Scoreインスタンスを生成
     beam = None #beamインスタンス生成
+    beams=[] #複数ビームを扱うリスト
     bombs=[ Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
     tmr = 0
@@ -197,13 +198,14 @@ def main():
                 return
         
         for i, bomb in enumerate(bombs):
-            if beam is not None:
-                if beam.rct.colliderect(bomb.rct): #ビームが爆弾を打ち落としたら
-                    beam = None
-                    bombs[i] = None
-                    bird.change_img(6, screen)
-                    score.add_score(1)  # スコアを10ポイント加算
-                    pg.display.update()
+             if any(beam is not None and beam.rct.colliderect(bomb.rct) for beam in beams):
+                for  beam in beams:
+                    if beam.rct.colliderect(bomb.rct): #ビームが爆弾を打ち落としたら
+                        beam = None
+                        bombs[i] = None
+                        bird.change_img(6, screen)
+                        score.add_score(1)  # スコアを10ポイント加算
+                        pg.display.update()
         score.update(screen)  # スコアを描画
 
 
@@ -211,10 +213,13 @@ def main():
         bird.update(key_lst, screen)
         # beam.update(screen) 
         bombs=[bomb for bomb in bombs if bomb is not None] #Noneでないものリスト
+        for beam in beams:
+            beam.update(screen)
+
+        # 爆弾の更新
+        bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでない爆弾だけリストに残す
         for bomb in bombs:  
             bomb.update(screen)
-        if beam is not None:
-            beam.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
