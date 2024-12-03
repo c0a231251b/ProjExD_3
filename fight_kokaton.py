@@ -183,7 +183,8 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beam = Beam(bird)
+                beams.append(beam) #リスト追加            
         screen.blit(bg_img, [0, 0])
         
         for bomb in bombs:
@@ -196,33 +197,31 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-        
-        for i, bomb in enumerate(bombs):
-             if any(beam is not None and beam.rct.colliderect(bomb.rct) for beam in beams):
-                for  beam in beams:
-                    if beam.rct.colliderect(bomb.rct): #ビームが爆弾を打ち落としたら
-                        beam = None
-                        bombs[i] = None
-                        bird.change_img(6, screen)
-                        score.add_score(1)  # スコアを10ポイント加算
-                        pg.display.update()
-        score.update(screen)  # スコアを描画
+        for beam in beams:
+            for i, bomb in enumerate(bombs):
+                if bomb is not None and beam.rct.colliderect(bomb.rct):
+                    beams.remove(beam)
+                    bombs[i] = None
+                    bird.change_img(6, screen)
+                    score.add_score(1)
+                    break
 
-
-        key_lst = pg.key.get_pressed()
-        bird.update(key_lst, screen)
-        # beam.update(screen) 
-        bombs=[bomb for bomb in bombs if bomb is not None] #Noneでないものリスト
+        beams = [beam for beam in beams if check_bound(beam.rct) == (True, True)]
         for beam in beams:
             beam.update(screen)
 
-        # 爆弾の更新
-        bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでない爆弾だけリストに残す
-        for bomb in bombs:  
+        bombs = [bomb for bomb in bombs if bomb is not None]
+        for bomb in bombs:
             bomb.update(screen)
+
+        score.update(screen)
+        key_lst = pg.key.get_pressed()
+        bird.update(key_lst, screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
+
+
  
 
 if __name__ == "__main__":
