@@ -155,6 +155,9 @@ class Bomb:
 
 
 class Score:
+    """
+    スコア表示クラス
+    """
     def __init__(self):
         self.fonto = pg.font.SysFont("hpg創英角ポップ体", 30)  # フォント設定
         self.color = (0, 0, 255)  # 青色
