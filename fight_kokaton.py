@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import math
 import time
 import pygame as pg
 
@@ -53,6 +54,7 @@ class Bird:
         こうかとん画像Surfaceを生成する
         引数 xy：こうかとん画像の初期位置座標タプル
         """
+        self.dire=(+5,0)
         self.img = __class__.imgs[(+5, 0)]
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
@@ -81,6 +83,7 @@ class Bird:
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
+            self.dire=tuple(sum_mv) #向きを更新
             self.img = __class__.imgs[tuple(sum_mv)]
         screen.blit(self.img, self.rct)
 
@@ -98,8 +101,18 @@ class Beam:
         self.rct = self.img.get_rect()
         self.rct.centery= bird.rct.centery #こうかとん中心座標
         self.rct.left =bird.rct.right #こうかとんの右座標
-        self.vx, self.vy = +5, 0
+        #こうかとんの向きに基づきビームの速度を設定
+        self.vx, self.vy = bird.dire
 
+        # ビーム画像の回転
+        angle = math.degrees(math.atan2(-self.vy, self.vx))
+        self.img = pg.transform.rotozoom(self.img, angle, 1.0)
+        
+        # 初期配置の設定
+        self.rct.centerx = bird.rct.centerx + bird.rct.width * self.vx // 5
+        self.rct.centery = bird.rct.centery + bird.rct.height * self.vy // 5
+
+ 
     def update(self, screen: pg.Surface):
         """
         ビームを速度ベクトルself.vx, self.vyに基づき移動させる
@@ -146,7 +159,7 @@ class Score:
         self.fonto = pg.font.SysFont("hpg創英角ポップ体", 30)  # フォント設定
         self.color = (0, 0, 255)  # 青色
         self.score = 0  # スコア初期値
-        self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
+        self.img = self.fonto.render(f"score: {self.score}", 0, self.color)
         self.rct = self.img.get_rect()
         self.rct.center = (100, HEIGHT - 50)  # 画面左下に配置
 
@@ -161,7 +174,7 @@ class Score:
         """
         現在のスコアを更新して画面に表示
         """
-        self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
+        self.img = self.fonto.render(f"score: {self.score}", 0, self.color)
         screen.blit(self.img, self.rct)
     
 
@@ -281,3 +294,4 @@ if __name__ == "__main__":
     main()
     pg.quit()
     sys.exit()
+
