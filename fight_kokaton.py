@@ -163,6 +163,44 @@ class Score:
         """
         self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
         screen.blit(self.img, self.rct)
+    
+
+class Explosion:
+    """
+    爆発エフェクトを表現するクラス
+    """
+    def __init__(self, center: tuple[int, int], life: int = 20):
+        """
+        引数:
+            center: 爆発が発生する座標
+            life: 爆発の持続時間（フレーム数）
+        """
+        self.images = [
+            pg.transform.flip(pg.image.load("fig/explosion.gif"), False, False),
+            pg.transform.flip(pg.image.load("fig/explosion.gif"), True, True),
+        ]
+        self.center = center
+        self.life = life
+        self.current_image = 0
+
+    def update(self, screen: pg.Surface):
+        """
+        爆発エフェクトを更新し、画面に描画する。
+        引数:
+            screen: ゲーム画面のSurface
+        """
+        if self.life > 0:
+            img = self.images[self.current_image]
+            rct = img.get_rect(center=self.center)
+            screen.blit(img, rct)
+            self.life -= 1
+            self.current_image = (self.current_image + 1) % len(self.images)
+
+
+
+
+    
+
 
 
 def main():
