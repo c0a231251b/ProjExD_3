@@ -141,12 +141,37 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Score:
+    def __init__(self):
+        self.fonto = pg.font.SysFont("hpg創英角ポップ体", 30)  # フォント設定
+        self.color = (0, 0, 255)  # 青色
+        self.score = 0  # スコア初期値
+        self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT - 50)  # 画面左下に配置
+
+    def add_score(self, points: int):
+        """
+        スコアを加算する
+        引数 points: 加算するポイント数
+        """
+        self.score += points
+
+    def update(self, screen: pg.Surface):
+        """
+        現在のスコアを更新して画面に表示
+        """
+        self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
+        screen.blit(self.img, self.rct)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200)) #birdインスタンスを生成
     bomb = Bomb((255, 0, 0), 10) #Bombインスタンスを生成
+    score=Score() #Scoreインスタンスを生成
     beam = None #beamインスタンス生成
     bombs=[ Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
@@ -177,7 +202,10 @@ def main():
                     beam = None
                     bombs[i] = None
                     bird.change_img(6, screen)
+                    score.add_score(1)  # スコアを10ポイント加算
                     pg.display.update()
+        score.update(screen)  # スコアを描画
+
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
