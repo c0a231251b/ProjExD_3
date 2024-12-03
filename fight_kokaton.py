@@ -212,6 +212,7 @@ def main():
     score=Score() #Scoreインスタンスを生成
     beam = None #beamインスタンス生成
     beams=[] #複数ビームを扱うリスト
+    explosions=[] #爆発エフェクトリスト
     bombs=[ Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
     tmr = 0
@@ -225,6 +226,7 @@ def main():
                 beams.append(beam) #リスト追加            
         screen.blit(bg_img, [0, 0])
         
+        #爆弾とこうかとんの衝突判定
         for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):
             # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
@@ -235,24 +237,36 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+        # こうかとんと爆弾の判定部分
         for beam in beams:
             for i, bomb in enumerate(bombs):
                 if bomb is not None and beam.rct.colliderect(bomb.rct):
-                    beams.remove(beam)
-                    bombs[i] = None
-                    bird.change_img(6, screen)
-                    score.add_score(1)
+                    beams.remove(beam)  # 衝突したビームを削除
+                    explosions.append(Explosion(bomb.rct.center))  # 爆発エフェクトを追加
+                    bombs[i] = None  # 衝突した爆弾を削除
+                    bird.change_img(6, screen)  # こうかとん画像変更
+                    score.add_score(1)  # スコア更新
                     break
 
+        #ビームの更新
         beams = [beam for beam in beams if check_bound(beam.rct) == (True, True)]
         for beam in beams:
             beam.update(screen)
 
+        #爆弾の更新
         bombs = [bomb for bomb in bombs if bomb is not None]
         for bomb in bombs:
             bomb.update(screen)
 
+        #爆発の更新
+        explosions = [exp for exp in explosions if exp.life > 0]  # 爆発リストを更新
+        for explosion in explosions:
+            explosion.update(screen)
+
+        #スコア更新
         score.update(screen)
+
+        #こうかんとんの更新
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         pg.display.update()
